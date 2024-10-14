@@ -15,9 +15,7 @@ def get_model():
     print(" * Model Loaded! ")
 
 def preprocess_image(image, target_size):
-    if image.mode != "RGB":
-        image = image.convert("RGB")
-    image = image.resize(target_size)
+    image = Image.new('RGB', (100,100))
     image = tf.keras.preprocessing.image.img_to_array(image)
     image = np.expand_dims(image, axis=0)
 
@@ -26,12 +24,15 @@ def preprocess_image(image, target_size):
 print(" * Loading Keras model.....")
 get_model()
 
-@app.route('/predict', methods=["POST"])
+@app.route('/predict', methods=["POST", "GET"])
 def predict():
+    print("Entered predict function")
     message = request.get_json(force=True)
     encoded = message['image']
+    #print(encoded)
     decoded = base64.b64decode(encoded)
-    image = Image.open(io.BytesIO(decoded))
+    #print(decoded)
+    image = Image.open(io.BytesIO(decoded)).tobytes()
     processed_image = preprocess_image(image, target_size=(100,100))
 
     prediction = model.predict(processed_image).tolist()
